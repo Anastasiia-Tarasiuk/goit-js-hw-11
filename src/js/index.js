@@ -16,27 +16,42 @@ const galleryEl = document.querySelector('.gallery');
 formEl.addEventListener('submit', onFormSubmit);
 loadMoreBtnEl.addEventListener('click', onBtnClick);
 
+loadMoreBtnEl.hidden = true;
+
 function onFormSubmit(e) {
     e.preventDefault();
-
+    
     pictureAPIService.resetPage();
+    cleanMarkup();
+    loadMoreBtnEl.hidden = true;
 
     pictureAPIService.request = e.currentTarget.elements.searchQuery.value;
 
-    pictureAPIService.pictureSearch().then(pictures => createMarkup(pictures));
+    if (e.currentTarget.elements.searchQuery.value !== "") {
+        pictureAPIService.pictureSearch().then(pictures => createMarkup(pictures));
+        
+        loadMoreBtnEl.hidden = false;
+       
+    } else {
+        Notiflix.Notify.failure(`Nothing to search for!`);
+    }
+
 
 }
 
 
 function onBtnClick() {
-    pictureAPIService.pictureSearch();
+    pictureAPIService.pictureSearch().then(pictures => createMarkup(pictures));
+    
+    
 }
 
 function createMarkup(picturesArray) {
     const markup = picturesArray.map(picture => {
-        return `<div class="photo-card">
+        return `
+        <div class="photo-card">
         <a class="card-link" href="${picture.largeImageURL}">
-        <img class="card-img" src="${picture.webformatURL}" alt="${picture.tags}" loading="lazy" />
+            <img class="card-img" src="${picture.webformatURL}" alt="${picture.tags}" loading="lazy" />
         </a>
         <div class="info">
         <p class="info-item">
@@ -52,13 +67,18 @@ function createMarkup(picturesArray) {
         <b>Downloads </b>${picture.downloads}
         </p>
         </div>
-        </div>`}).join('');
+        </div>
+        `}).join('');
         
     galleryEl.insertAdjacentHTML('beforeend', markup);
+
+    const lightbox = new SimpleLightbox('.gallery a');
+    lightbox.on('show.simplelightbox');
+    // lightbox.refresh();
 }
 
 
-const gallery = new SimpleLightbox('.gallery a');
-gallery.on('show.simplelightbox', function () {
-// do something…
-});
+function cleanMarkup() {
+    galleryEl.innerHTML = "";
+}
+

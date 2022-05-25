@@ -1,4 +1,49 @@
-// .photo-card {
-//     display: flex;
-// }
+.gallery {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
 
+    
+    margin: 0 auto;
+    
+    margin-right: calc(-1 * 15px);
+    margin-bottom: calc(-1 * 15px);
+}
+
+.photo-card {
+    border: 1px solid rgba(0, 0, 0, 0.8);
+    width: 350px;
+    height: auto;
+    overflow: hidden;
+
+    margin-right: 15px;
+    margin-bottom: 15px;
+}
+
+.info {
+    display: flex;
+
+    padding: 10px 0;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    margin: 0 auto;
+    
+}
+
+.card-link {
+    display: block;
+
+    width: 350px;
+    height: 280px;
+    overflow: hidden;
+    
+}
+
+.card-img {
+    object-fit: cover;
+    height: 100%;    
+}
