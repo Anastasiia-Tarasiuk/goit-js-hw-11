@@ -13,41 +13,78 @@ const formEl = document.querySelector('.search-form');
 const loadMoreBtnEl = document.querySelector('.load-more');
 const galleryEl = document.querySelector('.gallery');
 
+loadMoreBtnEl.hidden = true;
+
 formEl.addEventListener('submit', onFormSubmit);
 loadMoreBtnEl.addEventListener('click', onBtnClick);
 
-loadMoreBtnEl.hidden = true;
+console.dir(loadMoreBtnEl);
 
-function onFormSubmit(e) {
+
+async function onFormSubmit(e) {
     e.preventDefault();
     
     pictureAPIService.resetPage();
     cleanMarkup();
-    loadMoreBtnEl.hidden = true;
+    loadMoreBtnEl.classList.remove("visible");
 
     pictureAPIService.request = e.currentTarget.elements.searchQuery.value;
 
-    if (e.currentTarget.elements.searchQuery.value !== "") {
-        pictureAPIService.pictureSearch().then(pictures => createMarkup(pictures));
+    try {
+        const picturesFromApi = await pictureAPIService.pictureSearch();  
+
+        if (pictureAPIService.request !== "") {
+
+            const pictureForRender = await createMarkup(picturesFromApi);
         
-        loadMoreBtnEl.hidden = false;
+            loadMoreBtnEl.classList.add("visible");
+            
+            return pictureForRender;
        
-    } else {
-        Notiflix.Notify.failure(`Nothing to search for!`);
+        } else {
+            Notiflix.Notify.failure(`Nothing to search for!`);
+        }
+
+        console.log(picturesFromApi);
+    } catch (error) {
+        console.log(error);
     }
 
+     
+ 
+
+        // КОД БЕЗ ASYNC/AWAIT
+    // if (e.currentTarget.elements.searchQuery.value !== "") {
+    //     pictureAPIService.pictureSearch().then(pictures => createMarkup(pictures));
+
+    //     loadMoreBtnEl.classList.add("visible");
+       
+    // } else {
+    //     Notiflix.Notify.failure(`Nothing to search for!`);
+    // }
+
 
 }
 
 
-function onBtnClick() {
-    pictureAPIService.pictureSearch().then(pictures => createMarkup(pictures));
+async function onBtnClick() {
+
+    const picturesFromApi = await pictureAPIService.pictureSearch();
+
+    console.log(picturesFromApi);
+
+
+
+    return await createMarkup(picturesFromApi);
+
+        // КОД БЕЗ ASYNC/AWAIT
+    // pictureAPIService.pictureSearch().then(pictures => createMarkup(pictures));
     
     
 }
 
-function createMarkup(picturesArray) {
-    const markup = picturesArray.map(picture => {
+async function createMarkup(picturesArray) {
+    const markup = await picturesArray.map(picture => {
         return `
         <div class="photo-card">
         <a class="card-link" href="${picture.largeImageURL}">
