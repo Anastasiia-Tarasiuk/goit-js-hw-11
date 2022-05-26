@@ -13,13 +13,13 @@ const formEl = document.querySelector('.search-form');
 const loadMoreBtnEl = document.querySelector('.load-more');
 const galleryEl = document.querySelector('.gallery');
 
+
+const lightbox = new SimpleLightbox('.gallery a');
+
 loadMoreBtnEl.hidden = true;
 
 formEl.addEventListener('submit', onFormSubmit);
 loadMoreBtnEl.addEventListener('click', onBtnClick);
-
-console.dir(loadMoreBtnEl);
-
 
 async function onFormSubmit(e) {
     e.preventDefault();
@@ -27,17 +27,28 @@ async function onFormSubmit(e) {
     pictureAPIService.resetPage();
     cleanMarkup();
     loadMoreBtnEl.classList.remove("visible");
-
+    
     pictureAPIService.request = e.currentTarget.elements.searchQuery.value;
-
+    
     try {
         const picturesFromApi = await pictureAPIService.pictureSearch();  
-
-        if (pictureAPIService.request !== "") {
-
-            const pictureForRender = await createMarkup(picturesFromApi);
         
-            loadMoreBtnEl.classList.add("visible");
+        if (pictureAPIService.request !== "") {
+            
+            const pictureForRender = await createMarkup(picturesFromApi);
+            
+            // if () {
+                loadMoreBtnEl.classList.add("visible");
+            // }
+
+            const { height: cardHeight } = document
+                .querySelector(".search-form")
+                .getBoundingClientRect();
+            
+            window.scrollBy({
+                top: cardHeight,
+                behavior: "smooth",
+            });
             
             return pictureForRender;
        
@@ -45,12 +56,10 @@ async function onFormSubmit(e) {
             Notiflix.Notify.failure(`Nothing to search for!`);
         }
 
-        console.log(picturesFromApi);
     } catch (error) {
         console.log(error);
     }
 
-     
  
 
         // КОД БЕЗ ASYNC/AWAIT
@@ -64,20 +73,27 @@ async function onFormSubmit(e) {
     // }
 
 
+
 }
 
 
 async function onBtnClick() {
 
     const picturesFromApi = await pictureAPIService.pictureSearch();
+    const pictureMarkup = await createMarkup(picturesFromApi);
+  
+    const { height: cardHeight } = document
+        .querySelector(".photo-card")            
+        .getBoundingClientRect();
+            
+    window.scrollBy({
+        top: cardHeight * 2,
+        behavior: "smooth",
+    });
 
-    console.log(picturesFromApi);
-
-
-
-    return await createMarkup(picturesFromApi);
-
-        // КОД БЕЗ ASYNC/AWAIT
+    return pictureMarkup;
+    
+    // КОД БЕЗ ASYNC/AWAIT
     // pictureAPIService.pictureSearch().then(pictures => createMarkup(pictures));
     
     
@@ -88,7 +104,7 @@ async function createMarkup(picturesArray) {
         return `
         <div class="photo-card">
         <a class="card-link" href="${picture.largeImageURL}">
-            <img class="card-img" src="${picture.webformatURL}" alt="${picture.tags}" loading="lazy" />
+        <img class="card-img" src="${picture.webformatURL}" alt="${picture.tags}" loading="lazy" />
         </a>
         <div class="info">
         <p class="info-item">
@@ -108,13 +124,17 @@ async function createMarkup(picturesArray) {
         `}).join('');
         
     galleryEl.insertAdjacentHTML('beforeend', markup);
+     
+    lightbox.refresh('show.simplelightbox');
 
-    const lightbox = new SimpleLightbox('.gallery a');
-    lightbox.on('show.simplelightbox');
-    // lightbox.refresh();
+
+   
+
+    
+    
 }
-
-
+    
+    
 function cleanMarkup() {
     galleryEl.innerHTML = "";
 }

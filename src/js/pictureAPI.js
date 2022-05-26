@@ -16,8 +16,12 @@ export default class PictureApiServise {
 
         const fetchRequest = await fetch(`${URL}api/?key=${API_KEY}&q=${this.searchRequest}&image_type=photo&orientation=horizontal&safesearch=true&page=${this.page}&per_page=${perPage}`);
         const response = await fetchRequest.json();
-
-        if (this.page * perPage >= response.totalHits && response.totalHits !== 0) {
+        
+        // if (!response.ok) {
+        //     throw new Error(response.status);
+        // } 
+            
+            if (this.page * perPage >= response.totalHits && response.totalHits !== 0) {
                 Notiflix.Notify.warning(`We're sorry, but you've reached the end of search results.`);
             } else if (response.totalHits === 0 ) {
                 Notiflix.Notify.failure(`Sorry, there are no images matching your search query. Please try again.`);
