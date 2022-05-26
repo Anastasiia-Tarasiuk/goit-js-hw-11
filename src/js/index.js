@@ -1,7 +1,6 @@
 import '../sass/main.scss';
 import Notiflix from 'notiflix';
 import 'regenerator-runtime/runtime';
-import axios from 'axios';
 
 import SimpleLightbox from "simplelightbox";
 import "simplelightbox/dist/simple-lightbox.min.css";
@@ -13,6 +12,7 @@ const formEl = document.querySelector('.search-form');
 const loadMoreBtnEl = document.querySelector('.load-more');
 const galleryEl = document.querySelector('.gallery');
 
+let picturesOnPage = 0;
 
 const lightbox = new SimpleLightbox('.gallery a');
 
@@ -31,16 +31,24 @@ async function onFormSubmit(e) {
     pictureAPIService.request = e.currentTarget.elements.searchQuery.value;
     
     try {
-        const picturesFromApi = await pictureAPIService.pictureSearch();  
+        // Об'єкт з серверу
+        const picturesFromApi = await pictureAPIService.pictureSearch();
+        // Загальна кількість картинок, що віддає сервер
+        const totalPictures = await picturesFromApi.totalHits;
+        // Масив картинок для розмітки 1 сторінки
+        const picturesPerPage = await picturesFromApi.hits;
+
         
         if (pictureAPIService.request !== "") {
             
-            const pictureForRender = await createMarkup(picturesFromApi);
+            const pictureForRender = await createMarkup(picturesPerPage);
+  
+            if (picturesOnPage === totalPictures) {
+                loadMoreBtnEl.classList.remove("visible");
+            } else {
+                loadMoreBtnEl.classList.add("visible")
+            }
             
-            // if () {
-                loadMoreBtnEl.classList.add("visible");
-            // }
-
             const { height: cardHeight } = document
                 .querySelector(".search-form")
                 .getBoundingClientRect();
@@ -55,14 +63,11 @@ async function onFormSubmit(e) {
         } else {
             Notiflix.Notify.failure(`Nothing to search for!`);
         }
-
     } catch (error) {
         console.log(error);
     }
 
- 
-
-        // КОД БЕЗ ASYNC/AWAIT
+    // КОД БЕЗ ASYNC/AWAIT
     // if (e.currentTarget.elements.searchQuery.value !== "") {
     //     pictureAPIService.pictureSearch().then(pictures => createMarkup(pictures));
 
@@ -72,15 +77,22 @@ async function onFormSubmit(e) {
     //     Notiflix.Notify.failure(`Nothing to search for!`);
     // }
 
-
-
 }
 
 
 async function onBtnClick() {
+    // // Об'єкт з серверу
+    const picturesFromApi = await pictureAPIService.pictureSearch();  
+    // // Загальна кількість картинок, що віддає сервер
+    const totalPictures = await picturesFromApi.totalHits;
+    // // Масив картинок для розмітки 1 сторінки
+    const picturesPerPage = await picturesFromApi.hits;
+    // Рендер
+    const pictureMarkup = await createMarkup(picturesPerPage);
 
-    const picturesFromApi = await pictureAPIService.pictureSearch();
-    const pictureMarkup = await createMarkup(picturesFromApi);
+    if ( picturesOnPage === totalPictures) {
+        loadMoreBtnEl.classList.remove("visible");
+    } 
   
     const { height: cardHeight } = document
         .querySelector(".photo-card")            
@@ -96,11 +108,11 @@ async function onBtnClick() {
     // КОД БЕЗ ASYNC/AWAIT
     // pictureAPIService.pictureSearch().then(pictures => createMarkup(pictures));
     
-    
 }
 
 async function createMarkup(picturesArray) {
     const markup = await picturesArray.map(picture => {
+        picturesOnPage += 1;
         return `
         <div class="photo-card">
         <a class="card-link" href="${picture.largeImageURL}">
@@ -123,15 +135,9 @@ async function createMarkup(picturesArray) {
         </div>
         `}).join('');
         
-    galleryEl.insertAdjacentHTML('beforeend', markup);
-     
+        galleryEl.insertAdjacentHTML('beforeend', markup);
+
     lightbox.refresh('show.simplelightbox');
-
-
-   
-
-    
-    
 }
     
     
