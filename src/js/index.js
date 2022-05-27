@@ -23,12 +23,12 @@ loadMoreBtnEl.addEventListener('click', onBtnClick);
 
 async function onFormSubmit(e) {
     e.preventDefault();
-    
+    picturesOnPage = 0;
     pictureAPIService.resetPage();
     cleanMarkup();
     loadMoreBtnEl.classList.remove("visible");
     
-    pictureAPIService.request = e.currentTarget.elements.searchQuery.value;
+    pictureAPIService.query = e.currentTarget.elements.searchQuery.value;
     
     try {
         // Об'єкт з серверу
@@ -37,18 +37,17 @@ async function onFormSubmit(e) {
         const totalPictures = await picturesFromApi.totalHits;
         // Масив картинок для розмітки 1 сторінки
         const picturesPerPage = await picturesFromApi.hits;
-
         
         if (pictureAPIService.request !== "") {
             
-            const pictureForRender = await createMarkup(picturesPerPage);
-  
+            const pictureForRender = await createMarkup(picturesPerPage);          
+
             if (picturesOnPage === totalPictures) {
                 loadMoreBtnEl.classList.remove("visible");
             } else {
                 loadMoreBtnEl.classList.add("visible")
             }
-            
+
             const { height: cardHeight } = document
                 .querySelector(".search-form")
                 .getBoundingClientRect();
@@ -58,7 +57,7 @@ async function onFormSubmit(e) {
                 behavior: "smooth",
             });
             
-            return pictureForRender;
+            return;
        
         } else {
             Notiflix.Notify.failure(`Nothing to search for!`);
@@ -67,16 +66,6 @@ async function onFormSubmit(e) {
         console.log(error);
     }
 
-    // КОД БЕЗ ASYNC/AWAIT
-    // if (e.currentTarget.elements.searchQuery.value !== "") {
-    //     pictureAPIService.pictureSearch().then(pictures => createMarkup(pictures));
-
-    //     loadMoreBtnEl.classList.add("visible");
-       
-    // } else {
-    //     Notiflix.Notify.failure(`Nothing to search for!`);
-    // }
-
 }
 
 
@@ -84,11 +73,11 @@ async function onBtnClick() {
     // // Об'єкт з серверу
     const picturesFromApi = await pictureAPIService.pictureSearch();  
     // // Загальна кількість картинок, що віддає сервер
-    const totalPictures = await picturesFromApi.totalHits;
+    const totalPictures = picturesFromApi.totalHits;
     // // Масив картинок для розмітки 1 сторінки
-    const picturesPerPage = await picturesFromApi.hits;
+    const picturesPerPage = picturesFromApi.hits;
     // Рендер
-    const pictureMarkup = await createMarkup(picturesPerPage);
+    const pictureMarkup = createMarkup(picturesPerPage);
 
     if ( picturesOnPage === totalPictures) {
         loadMoreBtnEl.classList.remove("visible");
@@ -103,15 +92,11 @@ async function onBtnClick() {
         behavior: "smooth",
     });
 
-    return pictureMarkup;
-    
-    // КОД БЕЗ ASYNC/AWAIT
-    // pictureAPIService.pictureSearch().then(pictures => createMarkup(pictures));
-    
+    return pictureMarkup;    
 }
 
-async function createMarkup(picturesArray) {
-    const markup = await picturesArray.map(picture => {
+function createMarkup(picturesArray) {
+    const markup = picturesArray.map(picture => {
         picturesOnPage += 1;
         return `
         <div class="photo-card">
