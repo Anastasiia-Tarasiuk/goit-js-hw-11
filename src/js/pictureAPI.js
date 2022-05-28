@@ -34,7 +34,7 @@ export default class PictureApiServise {
             if (response.totalHits === 0) {
               Notiflix.Notify.failure(`Sorry, there are no images matching your search query. Please try again.`);
             }
-            if (response.totalHits > perPage && this.searchRequest !== "") {
+            if (response.totalHits > perPage && this.searchRequest !== "" && this.page === 1) {
                Notiflix.Notify.success(`Hooray! We found ${response.totalHits} images.`);
             }
             this.page += 1;

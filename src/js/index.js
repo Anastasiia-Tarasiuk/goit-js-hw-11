@@ -6,7 +6,7 @@ import SimpleLightbox from "simplelightbox";
 import "simplelightbox/dist/simple-lightbox.min.css";
 import PictureApiServise from './pictureAPI';
 
-const pictureAPIService = new PictureApiServise;
+const pictureAPIService = new PictureApiServise();
 
 const formEl = document.querySelector('.search-form');
 const loadMoreBtnEl = document.querySelector('.load-more');
@@ -34,11 +34,11 @@ async function onFormSubmit(e) {
         // Об'єкт з серверу
         const picturesFromApi = await pictureAPIService.pictureSearch();
         // Загальна кількість картинок, що віддає сервер
-        const totalPictures = await picturesFromApi.totalHits;
+        const totalPictures = picturesFromApi.totalHits;
         // Масив картинок для розмітки 1 сторінки
-        const picturesPerPage = await picturesFromApi.hits;
+        const picturesPerPage = picturesFromApi.hits;
         
-        if (pictureAPIService.request !== "") {
+        if (pictureAPIService.query !== "") {
             
             const pictureForRender = await createMarkup(picturesPerPage);          
 
@@ -57,7 +57,7 @@ async function onFormSubmit(e) {
                 behavior: "smooth",
             });
             
-            return;
+            return pictureForRender;
        
         } else {
             Notiflix.Notify.failure(`Nothing to search for!`);
